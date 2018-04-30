@@ -1,0 +1,23 @@
+steps:
+- name: 'gcr.io/cloud-builders/git'
+  args: ['clone', 'https://github.com/Masterminds/glide']
+
+- name: 'gcr.io/cloud-builders/glide'
+  dir: 'glide'
+  env: ['PROJECT_ROOT=github.com/Masterminds/glide']
+  args: ['install']
+
+- name: 'gcr.io/cloud-builders/go:debian'
+  dir: 'glide'
+  env: ['PROJECT_ROOT=github.com/Masterminds/glide']
+  args: ['install', '.']
+
+  # This line is here to copy the contents of /workspace
+  # to a GCS bucket and inspect them afterwards. Delete
+  # it if you already know what's going on.
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: ['cp', '-r', '.', 'gs://javiercm-demo/workspace']
+
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '--tag=gcr.io/$PROJECT_ID/build-glide', '.']
+images: ['gcr.io/$PROJECT_ID/build-glide']
